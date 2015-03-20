@@ -33,12 +33,54 @@ package com.basistech.jmh;
 
 import org.openjdk.jmh.annotations.Benchmark;
 
-public class MyBenchmark {
+public class ArrayBenchmark {
+    private final static int DIM = 1024;
 
     @Benchmark
-    public void testMethod() {
-        // This is a demo/sample template for building your JMH benchmarks. Edit as needed.
-        // Put your benchmark code here.
+    public double multiArray() {
+        double[][][] doubles = new double[DIM][DIM][DIM];
+        for (int x = 0; x < doubles.length; x++) {
+            double[][] d2 = doubles[x];
+            for (int y = 0; x < d2.length; y++) {
+                double[] d3 = d2[y];
+                for (int z = 0; z < d3.length; z++) {
+                    d3[z] = x * y * z;
+                }
+            }
+        }
+
+        double sum = 0;
+        for (int x = 0; x < doubles.length; x++) {
+            double[][] d2 = doubles[x];
+            for (int y = 0; x < d2.length; y++) {
+                double[] d3 = d2[y];
+                for (int z = 0; z < d3.length; z++) {
+                    sum += d3[z];
+                }
+            }
+        }
+        return sum;
     }
 
+    @Benchmark
+    public double flattenedArray() {
+        Matrix3 doubles = new Matrix3(DIM, DIM, DIM);
+        for (int x = 0; x < doubles.d1(); x++) {
+            for (int y = 0; x < doubles.d2(); y++) {
+                for (int z = 0; z < doubles.d3(); z++) {
+                    doubles.set(x, y, z, x * y * z);
+                }
+            }
+        }
+
+        double sum = 0;
+        for (int x = 0; x < doubles.d1(); x++) {
+            for (int y = 0; x < doubles.d2(); y++) {
+                for (int z = 0; z < doubles.d3(); z++) {
+                    sum += doubles.get(x, y, z);
+                }
+            }
+        }
+        return sum;
+    }
 }
