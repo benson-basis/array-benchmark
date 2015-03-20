@@ -32,30 +32,46 @@
 package com.basistech.jmh;
 
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
 
-public class ArrayBenchmark {
-    private final static int DIM = 1024;
 
-    @Benchmark
-    public double multiArray() {
-        double[][][] doubles = new double[DIM][DIM][DIM];
-        for (int x = 0; x < doubles.length; x++) {
-            double[][] d2 = doubles[x];
-            for (int y = 0; x < d2.length; y++) {
+/**
+ * Compare scans.
+ */
+@State(Scope.Thread)
+public class ScanBenchmark {
+    private final static int DIM = 256;
+    private double[][][] multiDoubles;
+    private Matrix3 matrix3;
+
+    public ScanBenchmark() {
+        multiDoubles = new double[DIM][DIM][DIM];
+        for (int x = 0; x < multiDoubles.length; x++) {
+            double[][] d2 = multiDoubles[x];
+            for (int y = 0; y < d2.length; y++) {
                 double[] d3 = d2[y];
                 for (int z = 0; z < d3.length; z++) {
                     d3[z] = x * y * z;
                 }
             }
         }
-
+        matrix3 = new Matrix3(DIM, DIM, DIM);
+        for (int x = 0; x < matrix3.d1(); x++) {
+            for (int y = 0; y < matrix3.d2(); y++) {
+                for (int z = 0; z < matrix3.d3(); z++) {
+                    matrix3.set(x, y, z, x * y * z);
+                }
+            }
+        }
+    }
+    @Benchmark
+    public double multiArrayScan() {
         double sum = 0;
-        for (int x = 0; x < doubles.length; x++) {
-            double[][] d2 = doubles[x];
-            for (int y = 0; x < d2.length; y++) {
-                double[] d3 = d2[y];
-                for (int z = 0; z < d3.length; z++) {
-                    sum += d3[z];
+        for (int x = 0; x < DIM; x++) {
+            for (int y = 0; y < DIM; y++) {
+                for (int z = 0; z < DIM; z++) {
+                    sum += multiDoubles[x][y][z];
                 }
             }
         }
@@ -63,21 +79,12 @@ public class ArrayBenchmark {
     }
 
     @Benchmark
-    public double flattenedArray() {
-        Matrix3 doubles = new Matrix3(DIM, DIM, DIM);
-        for (int x = 0; x < doubles.d1(); x++) {
-            for (int y = 0; x < doubles.d2(); y++) {
-                for (int z = 0; z < doubles.d3(); z++) {
-                    doubles.set(x, y, z, x * y * z);
-                }
-            }
-        }
-
+    public double flattenedArrayScan() {
         double sum = 0;
-        for (int x = 0; x < doubles.d1(); x++) {
-            for (int y = 0; x < doubles.d2(); y++) {
-                for (int z = 0; z < doubles.d3(); z++) {
-                    sum += doubles.get(x, y, z);
+        for (int x = 0; x < matrix3.d1(); x++) {
+            for (int y = 0; y < matrix3.d2(); y++) {
+                for (int z = 0; z < matrix3.d3(); z++) {
+                    sum += matrix3.get(x, y, z);
                 }
             }
         }
